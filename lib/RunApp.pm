@@ -1,7 +1,7 @@
 package RunApp;
 use strict;
 use base qw(RunApp::Control);
-our $VERSION = '0.10';
+our $VERSION = '0.12';
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ RunApp - A generic module to run web-applications
  RunApp->new (app_apache => RunApp::Apache->new
                     (root => catfile (cwd, $_),
                      httpd => '/path/to/httpd'),
-              my_daemon => RunApp::AppControl->new
+              my_daemon => RunApp::Control::AppControl->new
                     (binary => '/path/to/daemon',
                      args => ['--daemon'],
                      pidfile => '/path/to/daemon.pid',
@@ -93,6 +93,7 @@ sub build {
   my ($self, $conf) = @_;
   for (@{$self->{order}}) {
     my $subconf = ref $conf->{$_} ? $conf->{$_} : {};
+    next unless $self->services->{$_};
     $self->services->{$_}->build ( {%$conf, %$subconf} );
   }
 }
@@ -105,7 +106,7 @@ L<RunApp::Control> dispatching to the C<dispatch> method.
 
 =head1 SEE ALSO
 
-L<RunApp::Apache>, L<RunApp::AppControl>, L<App::Control>
+L<RunApp::Apache>, L<RunApp::Control::AppControl>, L<App::Control>
 
 =head1 AUTHORS
 

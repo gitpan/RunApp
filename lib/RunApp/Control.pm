@@ -10,6 +10,11 @@ AUTOLOAD {
   $self->dispatch ($cmd, @_);
 }
 
+# abstract
+sub dispatch {
+    die "This must be implemented by child.";
+}
+
 =head1 NAME
 
 RunApp::Control - Control class for RunApp
