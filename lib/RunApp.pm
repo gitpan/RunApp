@@ -1,13 +1,15 @@
 package RunApp;
 use strict;
 use base qw(RunApp::Control);
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 =head1 NAME
 
 RunApp - A generic module to run web-applications
 
 =head1 SYNOPSIS
+
+ use RunApp '-chdir';
 
  use RunApp;
  use RunApp::Apache;
@@ -33,6 +35,22 @@ development or deployment.
 It builds the config files required by the services from the
 C<$config> hash, such as apache's httpd.conf.
 
+=head1 OPTIONS
+
+ use RunApp '-chdir';
+ use RunApp qw(-chdir ..);
+
+This will cause the your script to C<chdir> to the base directory.  If
+it's a symbolic link it will be resolved and you will be in the
+directory of where the original script is.  The C<lib> directory will
+be added into C<@INC>, and you can use the modules in that path.
+
+It also takes an optional relative path if want the script to chdir to
+somewhere else.
+
+This makes it possible for symlinking the your runapp script into
+system's rc.d startup directory.
+
 =head1 CONSTRUCTOR
 
 =head2 new (@services)
@@ -46,6 +64,24 @@ into top level of the config hash, when running C<build> for the each
 service.
 
 =cut
+
+use File::Spec::Functions qw(catdir splitpath);
+use Cwd;
+
+sub import {
+  my $class = shift;
+  my $opt = shift or return;
+  if ($opt eq '-chdir') {
+    my $dir = shift;
+    $0 = Cwd::abs_path ($0);
+    my (undef, $path) = splitpath ($0);
+    chop $path if length $path > 1;
+    $path = catdir ($path, $dir) if defined $dir;
+    $path ||= Cwd::cwd;
+    unshift @INC, catdir ($path, 'lib');
+    chdir ($path);
+  }
+}
 
 sub new {
   my $class = shift;

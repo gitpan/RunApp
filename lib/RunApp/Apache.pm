@@ -131,7 +131,7 @@ sub debug {
 
 sub dispatch {
   my ($self, $cmd) = @_;
-  warn ". $cmd => $self->{httpd}\n";
+  #warn ". $cmd => $self->{httpd}\n";
   $self->{services}->{ctl}->$cmd;
 }
 

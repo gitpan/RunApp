@@ -6,24 +6,26 @@ use Template;
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new (@_);
-  my $source = $self->{file}.'.default';
-  if (-e $source) {
-    $self->{source} = $source;
-  }
-  else {
-    $self->{source} = $self->get_data;
+  unless ($self->{source}) {
+    my $source = $self->{file}.'.default';
+    if (-e $source) {
+      $self->{source} = $source;
+    }
+    else {
+      $self->{source} = $self->get_data;
+    }
   }
   return $self;
 }
 
 sub get_template {
   Template->new({ ABSOLUTE => 1,
-		  DEBUG_UNDEF => 1 });
+                  DEBUG_UNDEF => 1 });
 }
 
 sub build {
   my ($self, $conf) = @_;
-  warn ". building $self->{file}\n";
+  #warn ". building $self->{file}\n";
   my $tt = $self->get_template ($conf);
   $self->{source} ||= $self->{file}.'.default';
   $tt->process($self->{source}, {%$conf, PACKAGE => ref($self)}, $self->{file})
@@ -45,7 +47,12 @@ RunApp::Template - Base class for RunApp template service
 
 =head1 SYNOPSIS
 
- See RunApp
+  my $cron = RunApp::Template->new(
+    file => "file to be generated",
+    source => "template file",
+    .. other params, passed to template ..
+  );
+  
 
 =head1 DESCRIPTION
 

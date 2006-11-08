@@ -34,7 +34,7 @@ sub dispatch {
 sub write {
   my $self = shift;
   open my $fh, '>', $self->{file} or die "$self->{file}: $!";
-  warn ". building $self->{file}\n";
+  #warn ". building $self->{file}\n";
   my $control = YAML::Dump ($self->{control});
 
   my $perl = $Config{'perlpath'};

@@ -23,7 +23,7 @@ sub get_template {
 		    module_file =>
 		    sub {  $_ = shift;
 			   if ($conf->{AP_VERSION} == 1) {
-			       if ($_ eq 'perl' || $_ eq 'proxy' || $_ eq 'php3') {
+			       if ($_ eq 'perl' || $_ eq 'proxy' || $_ eq 'php3' || $_ eq "ssl") {
 				   return "lib$_.so";
 			       }
 			   }
@@ -50,9 +50,21 @@ uses L<Template Toolkit|Template>.
 
 =over
 
+=item timeout
+
+Default is 300.
+
 =item KeepAlive
 
 Default is Off.
+
+=item MaxKeepAliveRequests
+
+Default is 100.
+
+=item KeepAliveTimeout
+
+Default is 15.
 
 =item documentroot
 
@@ -104,11 +116,11 @@ ServerRoot "[% root %]"
 PidFile [% pidfile %]
 ScoreBoardFile [% logs %]/apache_runtime_status
 
-Timeout 100
+Timeout [% timeout || 300 %]
 
-KeepAlive [% KeepAlive || 'Off' %]
-MaxKeepAliveRequests 100
-KeepAliveTimeout 2
+KeepAlive [% keep_alive || 'Off' %]
+MaxKeepAliveRequests [% MaxKeepAliveRequests || 100 %]
+KeepAliveTimeout [% KeepAliveTimeout || 15 %]
 
 MinSpareServers [% MinSpareServers %]
 MaxSpareServers [% MaxSpareServers %]
@@ -137,8 +149,15 @@ LockFile "[% logs %]/httpd.lock"
 
 ServerTokens      Prod
 ServerSignature   Off
+
+[% IF hostname %]
 ServerName        [% hostname %]
+[% END %]
+
+[% IF webmaster %]
 ServerAdmin       [% webmaster %]
+[% END %]
+
 [% IF port %]
 Listen		  [% port %]
 [% END %]
@@ -161,7 +180,7 @@ ErrorLog "[% logs %]/error_log"
 LogLevel warn
 
 LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
-LogFormat "%h %l %u %t \"%r\" %>s %b (%{stopwatch}n usecs)" stopwatch
+LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" (%{stopwatch}n usecs)" stopwatch
 LogFormat "%h %l %u %t \"%r\" %>s %b" common
 LogFormat "%{Referer}i -> %U" referer
 LogFormat "%{User-agent}i" agent
@@ -176,10 +195,6 @@ CoreDumpDirectory /tmp
 
 <IfModule mod_perl.c>
 <Perl>
-[% IF AP_VERSION == 2 %]
-eval { use Apache2 };
-eval { use Apache::compat };
-[% END %]
 
 [% IF cover %]
 use Devel::Cover

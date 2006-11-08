@@ -1,14 +1,11 @@
-use ExtUtils::MakeMaker;
+use inc::Module::Install;
+name('RunApp');
+version_from('lib/RunApp.pm');
+requires('Template'     => '0'),
+requires('YAML'         => '0');
+requires('App::Control' => '0');
 
-# write the makefile
-WriteMakefile(
-    NAME		=> 'RunApp',
-    VERSION_FROM	=> 'lib/RunApp.pm',
-    PREREQ_PM		=> {
-                             Template  => 0,
-                             YAML  => 0,
-                             App::Control  => 0,
-                           },
-    ABSTRACT_FROM       => 'lib/RunApp.pm',
-    AUTHOR              => 'Chia-liang Kao <clkao@clkao.org>',
-);
+include('ExtUtils::AutoInstall');
+auto_install();
+
+WriteAll;
